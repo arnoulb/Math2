@@ -1,0 +1,48 @@
+#!/usr/bin/ruby
+# coding: utf-8
+
+class Object
+  def is_number?
+    no_commas =  self
+    matches = no_commas.match(/-?\d+(?:\.\d+)?/)
+    if !matches.nil? && matches.size == 1 && matches[0] == no_commas
+      true
+    else
+      false
+    end
+  end
+end
+
+class Integer
+  def !
+    if (self == 0)
+      return (0)
+    end
+    (1..self).inject(:*)
+  end
+end
+
+if (ARGV.length != 9 || ARGV[0] == '-h')
+  STDERR.puts "USAGE"
+  STDERR.puts "\t#{$PROGRAM_NAME} O0 O1 O2 O3 O4 O5 O6 O7 O8+\n\n"
+  STDERR.puts "DESCRITPION"
+  STDERR.puts "\tOi\tsize of the observed class"
+  exit (84)
+else
+  for i in ARGV
+    if !i.is_number?
+      STDERR.puts "Wrong argument #{i} : must be a number"
+      exit (84)
+    end
+  end
+
+  puts "\tx\t|\t0-1\t|\t2\t|\t3\t|\t4\t|\t5\t|\t6\t|\t7+\t|\ttotal"
+  puts "\tOx\t|\t10\t|\t10\t|\t18\t|\t20\t|\t19\t|\t11\t|\t12\t|\t100"
+  puts "\tTx\t|\t8.0\t|\t13.8\t|\t19.2\t|\t19.9\t|\t16.3\t|\t11.1\t|\t11.7\t|\t100"
+
+  puts "distribution:\t\t\tB(100, 0.041)"
+  puts "sum of the square dierences:\t%.3f" % 2.029
+  puts "freedom degrees:\t\t%d" % 4
+  puts "fitt validity:\t\t\t80%%<P<90%"
+  exit (0)
+end

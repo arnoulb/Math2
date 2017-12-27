@@ -1,0 +1,80 @@
+#!/usr/bin/ruby
+
+def binom(n,k)
+  (1+n-k..n).inject(:*)/(1..k).inject(:*)
+end
+if ( ARGV.length != 6 || ARGV[0] == '-h')
+    STDERR.puts "USAGE"
+    STDERR.puts "\t./201yams d1 d2 d3 d4 d5 c\n\n"
+    STDERR.puts "DESCRITPION"
+    STDERR.puts "\td1\tvalue of the first die (0 if not thrown)"
+    STDERR.puts "\td2\tvalue of the second die (0 if not thrown)"
+    STDERR.puts "\td3\tvalue of the third die (0 if not thrown)"
+    STDERR.puts "\td4\tvalue of the fourth die (0 if not thrown)"
+    STDERR.puts "\td5\tvalue of the fifth die (0 if not thrown)"
+    STDERR.puts "\tc\texpected combination"
+		exit (84)
+else
+	j = 1
+	error = 0
+	for i in ARGV[0..4]
+		if ((i.to_i > 6 || i.to_i < 0))
+			STDERR.puts "value of d#{j} must be a postitive number between 0 and 6"
+			error = 1
+		end
+		j = j + 1
+	end
+		if error == 1
+		exit (84)
+	end
+
+	dice = ARGV[0..4].map(&:to_i)
+	c = ARGV[5].split("_")
+	if (c[0] == "yams" || c[0] == "pair" || c[0] == "three" || c[0] == "four") && (c[1].to_i < 0 || c[1].to_i > 6)
+		STDERR.puts "the number of c param must be integer between 0 and 6"
+		exit 84
+	end
+	case c[0]
+		when "yams"
+			nb_ask = 5 - dice.count(c[1].to_i)
+			chances = binom(nb_ask, nb_ask) * (1/6.0)**nb_ask * (5/6.0)**(nb_ask-nb_ask) * 100
+			puts "chances to get a #{c[1]} yams: %.2f%%" % chances
+
+		when "pair"
+			nb_ask = dice.count(c[1].to_i)
+			if nb_ask > 2
+				chances = 100.00
+			elsif nb_ask == 1
+				chances = 66.66
+			else
+				chances = binom(5, 2) * (1/6.0)**2.0 * (5/6.0)**3.0 * 100;
+			end
+			puts "chances to get a #{c[1]} pair: %.2f%%" % chances
+		when "three"
+			nb_ask = 5 - dice.count(c[1].to_i)
+			nb_wanted = 3 - dice.count(c[1].to_i)
+			if (nb_wanted <= 0)
+				chances = 100.0
+			else
+				chances = binom(nb_ask, nb_wanted) * (1/6.0)**nb_wanted * (5/6.0)**(nb_ask-nb_wanted) * 100
+			end
+			puts "chances to get a #{c[1]} three: %.2f%%" % chances
+		when "four"
+			nb_ask = 5 - dice.count(c[1].to_i)
+			nb_wanted = 4 - dice.count(c[1].to_i)
+			if (nb_wanted <= 0)
+				chances = 100.0
+			else
+				chances = binom(nb_ask, nb_wanted) * (1/6.0)**nb_wanted * (5/6.0)**(nb_ask-nb_wanted) * 100
+			end
+			puts "chances to get a #{c[1]} four: %.2f%%" % chances
+		when "full"
+			puts "full"
+		when "straight"
+			puts "straight"
+		else
+			STDERR.puts "Unknown combination"
+			exit (84)
+	end
+	return (0)
+end

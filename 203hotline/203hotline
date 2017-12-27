@@ -1,0 +1,79 @@
+#!/usr/bin/ruby
+# coding: utf-8
+
+class Integer
+  def !
+    if (self == 0)
+      return (0)
+    end
+    (1..self).inject(:*)
+  end
+end
+
+def binom(n,k)
+  (1+n-k..n).inject(:*)/(1..k).inject(:*)
+end
+
+def poisson(d)
+  puts "Poisson distribution:"
+  lamb = (d / 8)
+  start = Time.now
+  sat = 0
+  for i in 0..50
+    res = (i == 0) ? 0 : ((lamb ** i) / (!i)) * (Math::E ** -lamb)
+    sat += res if (i > 25)
+    print "#{i} -> %.3f" % res, ((i + 1) % 6 == 0 && i != 0 || i == 50) ? "\n" : "\t"
+  end
+  sat *= 100;
+  endd = Time.now 
+  puts "overload: %.1f%" % sat
+  puts "computation time: %.2f ms" % ((endd - start) * 1000)
+end
+
+def binomial(d)
+  puts "Binomial distribution:"
+  start = Time.now
+  lamb = (d / (8 * 60.0))
+  sat = 0
+#  puts ((!3500) / (!13 * !(3500 - 13)))
+#  puts (lamb ** 13)
+#  puts ((13 - lamb) ** (3500 - 13))
+  for i in 0..50
+#    res = (i == 0) ? 0 : binom(50, i) * (lamb ** i) * ((1 - lamb) ** (50 - i))
+    res = (i == 0 || i == 50) ? 0 : ((!50) / (!i * !(50 - i))) * (lamb ** i) * ((1 - lamb) ** (50 - i))
+    sat += res if (i > 25)
+    print "#{i} -> %.3f" % res, ((i + 1) % 6 == 0 && i != 0 || i == 50) ? "\n" : "\t"
+  end
+  sat *= 100;
+  endd = Time.now
+  puts "overload: %.1f%" % sat
+  puts "computation time: %.2f ms" % ((endd - start) * 1000)
+end
+
+if ( ARGV.length < 1 || ARGV.length > 2 || ARGV[0] == '-h')
+  STDERR.puts "USAGE"
+  STDERR.puts "\t./203hotline [n k | d]\n\n"
+  STDERR.puts "DESCRITPION"
+  STDERR.puts "\tn\tn value for the computation of nk"
+  STDERR.puts "\tk\tk value for the computation of nk"
+  STDERR.puts "\td\taverage duration of calls (in seconds)"
+  exit (84)
+else
+  if (ARGV.length == 1)
+    d  = ARGV[0].to_i;
+    binomial(d)
+    print "\n"
+    poisson(d)
+  else
+    n = ARGV[0].to_i;
+    k = ARGV[1].to_i;
+    if (n.to_s != ARGV[0] || k.to_s != ARGV[1] || k < 0)
+      STDERR.puts "wrong parameter"
+      exit(84)
+    end
+    res = binom(n,k);
+    puts "#{k}-combination of a #{n} set:\n#{res}"
+  end
+  
+  exit (0)
+end

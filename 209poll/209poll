@@ -1,0 +1,75 @@
+#!/usr/bin/ruby
+# coding: utf-8
+
+class Object
+  def is_number?
+    no_commas =  self
+    matches = no_commas.match(/-?\d+(?:\.\d+)?/)
+    if !matches.nil? && matches.size == 1 && matches[0] == no_commas
+      true
+    else
+      false
+    end
+  end
+end
+
+class Integer
+  def !
+    if (self == 0)
+      return (0)
+    end
+    (1..self).inject(:*)
+  end
+end
+
+if (ARGV.length != 3 || ARGV[0] == '-h')
+  STDERR.puts "USAGE"
+  STDERR.puts "\t#{$PROGRAM_NAME} pSize sSize p\n\n"
+  STDERR.puts "DESCRITPION"
+  STDERR.puts "\tpSize\tsize of the population"
+  STDERR.puts "\tsSize\tsize of the sampl (supposed to be representative)"
+  STDERR.puts "\tp\tpercentage of voting intentions for a specific candidate"
+  exit (84)
+else
+  for i in ARGV
+    if !i.is_number?
+      STDERR.puts "Wrong argument #{i} : must be a number"
+      exit (84)
+    end
+  end
+
+  pop = ARGV[0].to_f
+  sample = ARGV[1].to_f
+  vote = ARGV[2].to_f
+  if pop <= 0
+    STDERR.puts "pSize must be > 0"
+    exit (84)
+  end
+  if sample > pop
+    STDERR.puts "sSize must be < pSize"
+    exit (84)
+  end
+  if vote > 100 || vote < 0
+    STDERR.puts "p must be between 0%% and 100%%"
+    exit (84)
+  end
+
+
+  puts "population size:\t#{ARGV[0]}"
+  puts "sample size:\t\t#{ARGV[1]}"
+  puts "voting intentions:\t#{ARGV[2]}%"
+
+  pc = vote / 100
+  variance = ((pc * (1 - pc)) / sample) * ((pop - sample) / (pop - 1))
+  v1 = ((2 * 1.96 * Math::sqrt(variance)) / 2) * 100
+  v2 = ((2 * 2.58 * Math::sqrt(variance)) / 2) * 100
+  
+  puts "variance:\t\t%.6f" % variance
+  v_min = (vote - v1 > 0 ? vote - v1 : 0) 
+  v_max = (vote + v1 < 100 ? vote + v1 : 100) 
+  puts "95%% confidence interval:\t[%.2f%% ; %.2f%%]" % [v_min, v_max]
+  v_min = (vote - v2 > 0 ? vote - v2 : 0) 
+  v_max = (vote + v2 < 100 ? vote + v2 : 100) 
+  puts "99%% confidence interval:\t[%.2f%% ; %.2f%%]" % [v_min, v_max]
+  exit (0)
+end

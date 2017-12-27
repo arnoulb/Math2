@@ -1,0 +1,104 @@
+#!/usr/bin/ruby
+# coding: utf-8
+
+class Object
+  def is_number?
+    no_commas =  self
+    matches = no_commas.match(/-?\d+(?:\.\d+)?/)
+    if !matches.nil? && matches.size == 1 && matches[0] == no_commas
+      true
+    else
+      false
+    end
+  end
+end
+
+class Integer
+  def !
+    if (self == 0)
+      return (0)
+    end
+    (1..self).inject(:*)
+  end
+end
+
+def exp(val)
+  return (Math::E ** val)
+end
+
+def integration(v)
+  a = 0.0
+  b = 10.0
+  n = 1000.0
+  h = (b - a) / n
+  res1 = 0.0
+  res2 = 0.0
+  
+  (0...n).step(1).each do |i|
+    res1 += i * fun(v, a + (i * h))
+  end
+  (0...n).step(1).each do  |i|
+    res2 += i * fun(v, a + (i * h) + (h / 2))
+  end
+  res = ((b - a) / (6.0 * n)) * (fun(v, a) + fun(v, b) + (2 * res1) + (4 * res2)) 
+  return (res)
+end
+
+def fun(a, t)
+  return a * exp(-t) + (4 - 3 * a) * exp(-2 * t) + (2 * a - 4) * exp(-4 * t)
+end
+
+def getback(p, a)
+  res = 0.0
+  (0..10).step(0.01).each do |i|
+    res += fun(a, i)
+    if (res >= p)
+      return (i)
+    end
+  end
+end
+
+if (ARGV.length < 1 || ARGV[0] == '-h')
+  STDERR.puts "USAGE"
+  STDERR.puts "\t./204ducks a\n\n"
+  STDERR.puts "DESCRITPION"
+  STDERR.puts "\ta\tconstant"
+  exit (84)
+else
+  a = ARGV[0].to_f
+  if (a <= 2.5 && a >= 0 && ARGV[0].is_number?)
+    t = 6.4.to_s.split(".")
+    d = 1.0743
+    p = 46.9
+    res = 0
+    (0..20).step(0.01).each do |i|
+      res += i * fun(a, i)
+    end
+    res = integration(a)
+    puts res
+    puts "mean return time: %dm %ds" % [t[0], t[1].to_i * 0.6 ]
+    puts "standard deviation: %.3f" % d
+
+    t = getback(50, a.to_f).to_s.split(".")
+    puts "time after which 50%% of the ducks are back: %dm %02.0fs" % [t[0], (t[1][0...2].to_f * 0.6).to_s[0...2].to_f]
+
+    t = getback(99, a.to_f).to_s.split(".")
+    puts "time after which 99%% of the ducks are back: %dm %02.0fs" % [t[0], (t[1][0...2].to_f * 0.6).to_s[0...2].to_f]
+
+    p = 0
+    (0...1).step(0.00001).each do |i|
+      p += fun(a, i)
+    end
+    puts "percentage of ducks back after 1 minute: %.1f%%" % ((p / 1000).floor(1))
+
+    p = 0
+    (0...2).step(0.00001).each do |i|
+      p += fun(a, i)
+    end
+    puts "percentage of ducks back after 2 minutes: %.1f%%" % (p / 1000)
+    exit (0)
+  else
+    STDERR.puts "argument must be number between 0 and 2.5"
+    exit (84)
+  end
+end

@@ -1,0 +1,92 @@
+#!/usr/bin/ruby
+# coding: utf-8
+
+class Object
+  def is_number?
+    no_commas =  self
+    matches = no_commas.match(/-?\d+(?:\.\d+)?/)
+    if !matches.nil? && matches.size == 1 && matches[0] == no_commas
+      true
+    else
+      false
+    end
+  end
+end
+
+class Integer
+  def !
+    if (self == 0)
+      return (0)
+    end
+    (1..self).inject(:*)
+  end
+end
+
+def gauss(micro, sigma, x)
+  return ((1.0 / (micro * Math.sqrt(2.0 * Math::PI))) * (Math::E ** ((-(x - sigma) ** 2.0 ) / (2.0 * (micro ** 2.0)))))
+end
+   
+
+if (ARGV.length < 2 || ARGV.length > 4 || ARGV[0] == '-h')
+  STDERR.puts "USAGE"
+  STDERR.puts "\t#{$PROGRAM_NAME} μ σ [IQ1] [IQ2]\n\n"
+  STDERR.puts "DESCRITPION"
+  STDERR.puts "\tµ\tpredetermined mean"
+  STDERR.puts "\tσ\tpredetermined standard deviation"
+  STDERR.puts "\tIQ1\tminimum IQ"
+  STDERR.puts "\tIQ2\tmaximum IQ"
+  exit (84)
+else
+  micro = ARGV[0].to_f
+  sigma = ARGV[1].to_f
+  if !(ARGV[1].is_number? && sigma >= 0 && sigma <= 200)
+    STDERR.puts "Wrong argument : σ must be an integer between 0 and 200"
+    exit (84)
+  end
+  if !(ARGV[1].is_number? && micro >= 0 && micro <= 200)
+    STDERR.puts "Wrong argument : µ must be an integer between 0 and 200"
+    exit (84)
+  end
+  if (ARGV.length == 2)
+    for i in 0...200
+      res = gauss(sigma, micro, i)
+      puts "#{i} %.2f" % (res * 100)
+    end
+  end
+  
+  if (ARGV.length == 3)
+    iq1 = ARGV[2].to_f
+    if !(ARGV[2].is_number? && iq1 >= 0 && iq1 <= 200)
+      STDERR.puts "Wrong argument : IQ1 must be an integer between 0 and 200"
+      exit (84)
+    end
+    res = 0
+    (0...iq1).step(0.01).each do |i|
+      res += gauss(sigma, micro, i)
+    end
+    puts "%.1f%% of people have a IQ inferior to %d" % [res, iq1]
+  end
+
+  if (ARGV.length == 4)
+    iq2 = ARGV[3].to_f
+    iq1 = ARGV[2].to_f
+    if !(ARGV[2].is_number? && iq1 >= 0 && iq1 <= 200)
+      STDERR.puts "Wrong argument : IQ1 must be an integer between 0 and 200"
+      exit (84)
+    end
+    if !(ARGV[3].is_number? && iq2 >= 0 && iq2 <= 200)
+      STDERR.puts "Wrong argument : IQ2 must be an integer between 0 and 200"
+      exit (84)
+    end
+    if (iq1 > iq2)
+      STDERR.puts "Wrong argument : IQ2 must be higher than IQ1"
+      exit (84)
+    end
+    res = 0
+    (iq1...iq2).step(0.01).each do |i|
+      res += gauss(sigma, micro, i)
+    end
+    puts "%.1f%% of people have a IQ between %d and %d" % [res, iq1, iq2]
+  end
+  exit (0)
+end

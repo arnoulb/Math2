@@ -1,0 +1,72 @@
+#!/usr/bin/ruby
+# coding: utf-8
+
+class Object
+  def is_number?
+    no_commas =  self
+    matches = no_commas.match(/-?\d+(?:\.\d+)?/)
+    if !matches.nil? && matches.size == 1 && matches[0] == no_commas
+      true
+    else
+      false
+    end
+  end
+end
+
+class Integer
+  def !
+    if (self == 0)
+      return (0)
+    end
+    (1..self).inject(:*)
+  end
+end
+
+def gets_value()
+  print "indstast din vaerdi: "
+  val = STDIN.gets
+  return (val)
+end
+
+if (ARGV.length != 4 || ARGV[0] == '-h')
+  STDERR.puts "USAGE"
+  STDERR.puts "\t#{$PROGRAM_NAME} n a h sd\n\n"
+  STDERR.puts "DESCRITPION"
+  STDERR.puts "\tn\tnumber of values"
+  STDERR.puts "\ta\tarithmetique mean"
+  STDERR.puts "\th\tharmonic mean"
+  STDERR.puts "\tsd\tstandard deviation"
+  exit (84)
+else
+  for i in ARGV
+    if (i.is_number? == false || i.to_f < 0)
+      STDERR.puts "Wrong argument #{i} : must be a positiv number"
+      exit (84)
+    end
+  end
+  n, a, h, sd = ARGV.map(&:to_f)
+  while ((inp = gets_value) != nil && inp.chomp.upcase != "ENDE")
+    inp = inp.chomp
+    if (inp.is_number?)
+      v = 1.2
+      tmp = n * a
+      square = ((sd ** 2) + (a ** 2)) * n
+      
+      n += 1
+      a = (tmp + inp.to_f) / n
+      sd = Math::sqrt(((square + (inp.to_f ** 2)) / n) - a ** 2)
+      k = Math::sqrt((square + (inp.to_f ** 2)) / n)
+      h = n / ((1 / inp.to_f) + ((n - 1) / h))
+      puts "\tantal mãlinder :\t#{n.to_i}"
+      puts "\tstandardafvilgelse :\t%.2f" % sd
+      puts "\taritmetisk gennemsnit :\t%.2f" % a
+      puts "\tkvadratisk gennemsnit :\t%.2f" % k
+      puts "\tharmonisk gennemsnit :\t%.2f" % h
+      puts
+    else
+      STDERR.puts "ERROR : value must be a number"
+      exit (84)
+    end
+  end
+  exit (0)
+end

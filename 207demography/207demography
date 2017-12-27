@@ -1,0 +1,120 @@
+#!/usr/bin/ruby
+# coding: utf-8
+
+class Object
+  def is_number?
+    no_commas =  self
+    matches = no_commas.match(/-?\d+(?:\.\d+)?/)
+    if !matches.nil? && matches.size == 1 && matches[0] == no_commas
+      true
+    else
+      false
+    end
+  end
+end
+
+class Integer
+  def !
+    if (self == 0)
+      return (0)
+    end
+    (1..self).inject(:*)
+  end
+end
+
+if (ARGV.length < 1 || ARGV[0] == '-h')
+  STDERR.puts "USAGE"
+  STDERR.puts "\t#{$PROGRAM_NAME} code1 [...]\n\n"
+  STDERR.puts "DESCRITPION"
+  STDERR.puts "\tcode1\tcountry code"
+  exit (84)
+else
+  f = File.open("207demography_data.csv", "r")
+  content = File.read(f)
+
+  input = Array.new
+  while i = f.gets
+    input << i.strip.split(';')
+  end
+
+  country = Array.new
+  for arg in ARGV
+    flag = 0
+    for i in input
+      if arg == i[1]
+        flag = 1
+        country << i
+      end
+    end
+    if flag == 0
+      STDERR.puts "Wrong argument: '#{arg}' not in file data";
+      exit (84)
+    end
+  end
+  pop = Array.new(country[0][2..-1].length, 0)
+  print "country:"
+  for i in country
+    print ((i == country.last) ? " #{i[0]}\n" : " #{i[0]},")
+    i[2..-1].each_with_index do |item, index|
+      pop[index] += item.to_i
+    end
+  end
+  an = 0.0
+  ad = 0.0
+  a = 0.0
+  b = 0.0
+  avg_year = 0.0
+  avg_pop = 0.0
+  (1961..2011).each_with_index do |item, index|
+    an += item * (pop[index].to_f / 10 ** 6)
+    ad += item ** 2
+    avg_year += item
+    avg_pop += (pop[index].to_f / 10 ** 6)
+  end
+  avg_year /= pop.length
+  avg_pop /= pop.length
+  an -=  pop.length * avg_year * avg_pop
+  ad -= pop.length * avg_year ** 2
+  a = an / ad
+  b = avg_pop - a * avg_year
+
+  corr = a 
+  ec = 0.0
+  (1961..2011).each_with_index do |item, index|
+    tmp = (pop[index].to_f / (10 ** 6)) - (b + a * item)
+    ec += tmp**2
+  end
+  dev = Math::sqrt(ec / (51))
+  pop_2050 = a * 2050 + b
+  puts "fit 1"
+  puts "\tY = %.2f X - %.2f" % [a, (b > 0) ? b : -b]
+  puts "\tstandard deviation:\t%.2f" % dev
+  puts "\tpopulation in 2050:\t%.2f" % pop_2050
+
+
+  an = 0.0
+  ad = 0.0
+  a = 0.0
+  b = 0.0
+  (1961..2011).each_with_index do |item, index|
+    an += (item - avg_year) * ((pop[index].to_f / 10 ** 6) - avg_pop)
+    ad += ((pop[index].to_f / 10 ** 6) - avg_pop) ** 2
+  end
+  a = an / ad
+  b = avg_year - a * avg_pop
+  ec = 0.0
+  (1961..2011).each_with_index do |item, index|
+    tmp = (pop[index].to_f / (10 ** 6)) - ((item - b) / a)
+    ec += tmp**2
+  end
+  dev = Math::sqrt(ec / (51))
+  pop_2050 = (2050 - b) / a
+  puts "fit 2"
+  puts "\tX = %.2f Y + %.2f" % [a, b]
+  puts "\tstandard deviation:\t%.2f" % dev
+  puts "\tpopulation in 2050:\t%.2f" % pop_2050
+
+  corr = (Math::sqrt(corr * a))
+  puts "correlation: %.4f" % corr
+  exit (0)
+end
